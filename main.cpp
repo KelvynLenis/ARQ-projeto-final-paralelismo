@@ -4,12 +4,57 @@
 #include <math.h>
 #include <chrono>
 #include <set>
+#include <vector>
 
-#define ARRAY_SIZE 100000000
-#define ARRAY_VALUE 1231
 #define NUM_THREADS 4
 
 using namespace std;
+
+void swap(int* a, int* b){
+    int t = *a;
+    *a = *b;
+    *b = t;
+}
+ 
+/* This function takes last element as pivot, places
+the pivot element at its correct position in sorted
+array, and places all smaller (smaller than pivot)
+to left of pivot and all greater elements to right
+of pivot */
+int partition (int arr[], int low, int high){
+    int pivot = arr[high]; // pivot
+    int i = (low - 1); // Index of smaller element and indicates the right position of pivot found so far
+ 
+    for (int j = low; j <= high - 1; j++)
+    {
+        // If current element is smaller than the pivot
+        if (arr[j] < pivot)
+        {
+            i++; // increment index of smaller element
+            swap(&arr[i], &arr[j]);
+        }
+    }
+    swap(&arr[i + 1], &arr[high]);
+    return (i + 1);
+}
+ 
+/* The main function that implements QuickSort
+arr[] --> Array to be sorted,
+low --> Starting index,
+high --> Ending index */
+void quickSort(int arr[], int low, int high){
+    if (low < high)
+    {
+        /* pi is partitioning index, arr[p] is now
+        at right place */
+        int pi = partition(arr, low, high);
+ 
+        // Separately sort elements before
+        // partition and after partition
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
 
 int search(set<int> myset, int value){
     set<int>::iterator it;
@@ -23,8 +68,7 @@ int search(set<int> myset, int value){
     return -1;
 }
 
-void merge(int array[], int const left, int const mid, int const right)
-{
+void merge(int array[], int const left, int const mid, int const right){
     auto const subArrayOne = mid - left + 1;
     auto const subArrayTwo = right - mid;
  
@@ -86,13 +130,17 @@ int main() {
 
     auto tinit= std::chrono::high_resolution_clock::now();
 
-    const int sz = 20000000;
-    int myArr[sz];
+    const int sz = 1000000;
+    vector<int> myVec;
     set<int> myset;
+    int myArr[sz];
+
+    auto arr_size = sizeof(myArr) / sizeof(myArr[0]);
 
     for(int i=0;i<sz;i++){
-        myset.insert(rand()%10000);  //Generate number between 0 to 99
-        myArr[i]= rand()%100;
+        // myset.insert(rand()%10000);  //Generate number between 0 to 99
+        myArr[i] = rand()%100;
+        // myVec.push_back(rand()%100);
     }
 
     auto tinit2 = std::chrono::high_resolution_clock::now();
@@ -104,7 +152,10 @@ int main() {
 
     auto t1 = std::chrono::high_resolution_clock::now();
     
-    cout << search(myset, 217) << endl;
+    // cout << search(myset, 217) << endl;
+    for(int i = 0; i < 10; i++){
+        mergeSort(myArr, 0, arr_size - 1);
+    }
 
     auto t2 = std::chrono::high_resolution_clock::now();
 
