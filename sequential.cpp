@@ -10,8 +10,6 @@
 
 using namespace std;
 static long num_steps = 5;
-int nthreads; 
-
 
 void swap(int* a, int* b){
     int t = *a;
@@ -80,21 +78,16 @@ void merge(int array[], int const left, int const mid, int const right){
          *rightArray = new int[subArrayTwo];
  
     // Copy data to temp arrays leftArray[] and rightArray[]
-		#pragma omp parallel
-		{
-			#pragma omp for nowait
-			for (auto i = 0; i < subArrayOne; i++){
-				leftArray[i] = array[left + i];
-			}
-
-			#pragma omp for nowait
-			for (auto j = 0; j < subArrayTwo; j++){
-				rightArray[j] = array[mid + 1 + j];
-			}
-		}
+    for (auto i = 0; i < subArrayOne; i++){
+      leftArray[i] = array[left + i];
+    }
+    
+    for (auto j = 0; j < subArrayTwo; j++){
+      rightArray[j] = array[mid + 1 + j];
+    }
  
-    auto indexOfSubArrayOne = 0; // Initial index of first sub-array
-		auto indexOfSubArrayTwo = 0; // Initial index of second sub-array
+    auto indexOfSubArrayOne = 0, // Initial index of first sub-array
+        indexOfSubArrayTwo = 0; // Initial index of second sub-array
     int indexOfMergedArray = left; // Initial index of merged array
  
     // Merge the temp arrays back into array[left..right]
@@ -111,24 +104,18 @@ void merge(int array[], int const left, int const mid, int const right){
     }
     // Copy the remaining elements of
     // left[], if there are any
-
-		#pragma omp parallel
-		{
-			#pragma omp while nowait
-			while (indexOfSubArrayOne < subArrayOne) {
-				array[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
-				indexOfSubArrayOne++;
-				indexOfMergedArray++;
-			}
-			// Copy the remaining elements of
-			// right[], if there are any
-			#pragma omp while nowait
-			while (indexOfSubArrayTwo < subArrayTwo) {
-				array[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
-				indexOfSubArrayTwo++;
-				indexOfMergedArray++;
-			}
-		}
+    while (indexOfSubArrayOne < subArrayOne) {
+        array[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
+        indexOfSubArrayOne++;
+        indexOfMergedArray++;
+    }
+    // Copy the remaining elements of
+    // right[], if there are any
+    while (indexOfSubArrayTwo < subArrayTwo) {
+        array[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
+        indexOfSubArrayTwo++;
+        indexOfMergedArray++;
+    }
 }
 
 void mergeSort(int array[], int const begin, int const end){
@@ -137,22 +124,9 @@ void mergeSort(int array[], int const begin, int const end){
 
 	auto mid = begin + (end - begin) / 2;
 
-	// Com paralelismo
-	// #pragma omp parallel 
-	// {
-	// 	#pragma omp nowait
-	// 	mergeSort(array, begin, mid);
-	// 	#pragma omp nowait
-	// 	mergeSort(array, mid + 1, end);
-	// 	// #pragma omp
-	// 	merge(array, begin, mid, end);
-	// }
-
-	//  Sem paralelismo
 	mergeSort(array, begin, mid);
 	mergeSort(array, mid + 1, end);
 	merge(array, begin, mid, end);
-
 }
 
 int main() {
@@ -176,19 +150,6 @@ int main() {
 	float timeInit = (float)durationInit/1000000;
 
 	cout << "Init time: " << timeInit << endl;
-
-	omp_set_num_threads(NUM_THREADS);
-
-	#pragma omp parallel 
-    {
-		int i, id, NT;
-		double x;
-		id = omp_get_thread_num();
-		NT = omp_get_num_threads();
-		if (id == 0){
-			nthreads = NT;
-		}
-	}
 
 	auto t1 = std::chrono::high_resolution_clock::now();
 

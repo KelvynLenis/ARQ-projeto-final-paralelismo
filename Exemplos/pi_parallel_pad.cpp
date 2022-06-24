@@ -15,7 +15,6 @@ int main (){
 
 	auto t1 = std::chrono::high_resolution_clock::now();
 
-
 	int i, nthreads;  
 	double pi, sum[NUM_THREADS][PAD];	
 	
@@ -43,15 +42,8 @@ int main (){
 		pi += sum[i][0] * step;
 
 	auto t2 = std::chrono::high_resolution_clock::now();
+	auto duration = (std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
+	float time = (float)duration/1000000;
 
-    auto duration = (std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
-
-    float time = (float)duration/1000000;
-
-    std::cout << time << std::endl;
-	
-
-  
-
-  
-  }
+	std::cout << time << std::endl;	
+}
