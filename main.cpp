@@ -10,7 +10,7 @@
 
 using namespace std;
 static long num_steps = 5;
-int nthreads; 
+const int sz = 1000000;
 
 void swap(int* a, int* b){
     int t = *a;
@@ -52,7 +52,7 @@ void quickSort(int arr[], int low, int high){
 
 			// Separately sort elements before
 			// partition and after partition
-			#pragma omp nowait
+			#pragma omp
 			quickSort(arr, low, pi - 1);
 			#pragma omp
 			quickSort(arr, pi + 1, high);
@@ -144,9 +144,8 @@ void mergeSort(int array[], int const begin, int const end){
 int main() {
 
 	srand((unsigned) time(0));
-	const int sz = 1000000;
 	int myArr[sz];
-	omp_set_num_threads(NUM_THREADS);
+	// omp_set_num_threads(NUM_THREADS);
 	auto arr_size = sizeof(myArr) / sizeof(myArr[0]);
 
 	// ================ Inicialização do array ==================
@@ -174,13 +173,4 @@ int main() {
 	float time = (float)duration/1000000;
 
 	std::cout << "Tempo de processamento = " << time << " segundos." << std::endl;
-
-	// #pragma omp parallel
-	// {
-	// 	#pragma omp for
-	// 	for(int i = 0; i < 10; i++){
-	// 		cout << "i: " << i << endl;
-	// 	}
-	// }
-
 }

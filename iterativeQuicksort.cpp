@@ -64,13 +64,13 @@ void iterativeQuicksort(int a[], int n){
     // push subarray indices containing elements that are
     // less than the current pivot to stack
     if (pivot - 1 > start) {
-        s.push(make_pair(start, pivot - 1));
+      s.push(make_pair(start, pivot - 1));
     }
 
     // push subarray indices containing elements that are
     // more than the current pivot to stack
     if (pivot + 1 < end) {
-        s.push(make_pair(pivot + 1, end));
+      s.push(make_pair(pivot + 1, end));
     }
   }
 }

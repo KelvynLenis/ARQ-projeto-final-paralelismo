@@ -10,7 +10,7 @@
 
 using namespace std;
 static long num_steps = 100;
-static const long sz = 10000;
+static const long sz = 100000;
 int nthreads;
 
 int search(int arr[], int value){
@@ -24,34 +24,38 @@ int search(int arr[], int value){
 }
 
 void searchParallel(int arr[], int value){
-  // int slice1[sz / 4];
-  // int slice2[sz / 4];
-  // int slice3[sz / 4];
-  // int slice4[sz / 4];
+  int slice1[sz / 4];
+  int slice2[sz / 4];
+  int slice3[sz / 4];
+  int slice4[sz / 4];
 
   int first = sz * 0.25;
   int second = sz * 0.50;
   int third = sz * 0.75;
 
-  // #pragma omp parallel
-  // {
-  //   #pragma omp for
-  //   for(int i = 0; i < first; i++){
-  //     slice1[i] = arr[i];
-  //   }
-  //   #pragma omp for
-  //   for(int j = first; j < second; j++){
-  //     slice2[j] = arr[j];    
-  //   }
-  //   #pragma omp for
-  //   for(int k = second; k < third; k++){
-  //     slice3[k] = arr[k];
-  //   }
-  //   #pragma omp for
-  //   for(int l = third; l < sz; l++){
-  //     slice4[l] = arr[l];
-  //   }
-  // }
+  #pragma omp parallel sections shared(arr)
+  {
+    #pragma omp section
+    {
+      for(int i = 0; i < first; i++){
+        slice1[i] = arr[i];
+      }
+    }
+    #pragma omp section
+    {
+      for(int j = first; j < second; j++){
+        slice2[j] = arr[j];    
+      }
+    }
+    // #pragma omp for
+    // for(int k = second; k < third; k++){
+    //   slice3[k] = arr[k];
+    // }
+    // #pragma omp for
+    // for(int l = third; l < sz; l++){
+    //   slice4[l] = arr[l];
+    // }
+  }
 
   // #pragma omp parallel for shared(arr)
   // for(int i = 0; i < first; i++){
@@ -67,38 +71,38 @@ void searchParallel(int arr[], int value){
   //   slice4[l] = arr[l];
   // }
 
-  #pragma omp parallel shared(arr)
-  {
-    // busca
-    #pragma omp for nowait
-    for(int i = 0; i < first; i++){
-      if(arr[i] == value){
-        // cout <<  i << endl;
-        #pragma exit searchParallel 30;
-      }
-    }
-    #pragma omp for nowait
-    for(int j = first; j < second; j++){
-      if(arr[j] == value){
-        // cout << j << endl;
-        #pragma exit searchParallel 30;
-      }    
-    }
-    #pragma omp for nowait
-    for(int k = second; k < third; k++){
-      if(arr[k] == value){
-        #pragma exit searchParallel 30;
-        // cout << k << endl;
-      }
-    }
-    #pragma omp for nowait
-    for(int l = third; l < sz; l++){
-      if(arr[l] == value){
-        #pragma exit searchParallel 30;
-        // cout << l << endl;
-      }
-    }
-  }
+  // #pragma omp parallel shared(arr)
+  // {
+  //   // busca
+  //   #pragma omp for nowait
+  //   for(int i = 0; i < first; i++){
+  //     if(arr[i] == value){
+  //       // cout <<  i << endl;
+  //       #pragma omp cancel for
+  //     }
+  //   }
+  //   #pragma omp for nowait
+  //   for(int j = first; j < second; j++){
+  //     if(arr[j] == value){
+  //       // cout << j << endl;
+  //       #pragma omp cancel for
+  //     }    
+  //   }
+  //   #pragma omp for nowait
+  //   for(int k = second; k < third; k++){
+  //     if(arr[k] == value){
+  //       // cout << k << endl;
+  //       #pragma omp cancel for
+  //     }
+  //   }
+  //   #pragma omp for nowait
+  //   for(int l = third; l < sz; l++){
+  //     if(arr[l] == value){
+  //       // cout << l << endl;
+  //       #pragma omp cancel for
+  //     }
+  //   }
+  // }
 }
 
 vector<int> init(){
@@ -175,7 +179,9 @@ int main() {
   auto tinitVector = std::chrono::high_resolution_clock::now();
 
   vector<int> sequential;
-  sequential = init();
+  for(int i = 0; i < num_steps; i++){
+    sequential = init();
+  }
 
 	auto tinitVector2 = std::chrono::high_resolution_clock::now();
 	auto durationInitVector = (chrono::duration_cast<chrono::microseconds>( tinitVector2 - tinitVector ).count());
@@ -198,10 +204,10 @@ int main() {
 	// ================ Busca no array ==================
 	auto t1 = std::chrono::high_resolution_clock::now();
 
-	// for(int i = 0; i < num_steps; i++){
-  //   search(myArr, 7);
-	// }
-  searchVector(sequential, 8);
+	for(int i = 0; i < num_steps; i++){
+    search(myArr, 7);
+	}
+  // searchVector(sequential, 8);
 
 	auto t2 = std::chrono::high_resolution_clock::now();
 	auto duration = (std::chrono::duration_cast<std::chrono::nanoseconds>( t2 - t1 ).count());
@@ -214,7 +220,8 @@ int main() {
 	auto tParallel1 = std::chrono::high_resolution_clock::now();
 
 	for(int i = 0; i < num_steps; i++){
-    searchParallel(myArr, 7);
+    // searchParallel(myArr, 7);
+    searchVectorParallel(parallel, 7);
 	}
 
 	auto tParallel2 = std::chrono::high_resolution_clock::now();
