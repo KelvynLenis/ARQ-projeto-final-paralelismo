@@ -15,12 +15,12 @@ struct Result
 };
 
 double f(const double x);
-const Result rectangleMethod(const double, const double, const double, const int);
-const Result trapezoidalMethod(const double, const double, const double, const int);
+const Result rectangleMethod(const double, const double, const double);
+const Result trapezoidalMethod(const double, const double, const double);
 
 int main()
 {
-	const short maxThreads = 4;
+	const short steps = 4;
 	short method;
 	double x1, x2, dx;
 
@@ -35,11 +35,11 @@ int main()
 			cout << "   Method (1 - rectangle, 2 - trapezoidal): "; cin >> method;
 
 			list<pair<short, Result>> results;
-			for (int i = 0; i < maxThreads; i++)
+			for (int i = 0; i < steps; i++)
 			{
 				Result result = (method == 1) ?
-					rectangleMethod(x1, x2, dx, i + 1) :
-					trapezoidalMethod(x1, x2, dx, i + 1);
+					rectangleMethod(x1, x2, dx) :
+					trapezoidalMethod(x1, x2, dx);
 
 				pair<short, Result> s_result(i + 1, result);
 				results.push_back(s_result);
@@ -48,7 +48,7 @@ int main()
 			cout << endl << "   Results:" << endl;
 			for (auto & result : results)
 			{
-				cout << "   Threads: " << result.first;
+				cout << "   Step: " << result.first;
 				cout << ", timestamp: " << result.second.timestamp;
 				cout << ", area: " << result.second.area << endl;
 			}
@@ -63,13 +63,12 @@ int main()
 	return 0;
 }
 
-const Result rectangleMethod(const double x1, const double x2, const double dx, const int nThreads)
+const Result rectangleMethod(const double x1, const double x2, const double dx)
 {
 	const int N = static_cast<int>((x2 - x1) / dx);
 	double now = omp_get_wtime();
 	double s = 0;
 
-	#pragma omp parallel for num_threads(nThreads) reduction(+: s)
 	for (int i = 1; i <= N; i++) s += f(x1 + i * dx);
 
 	s *= dx;
@@ -77,13 +76,12 @@ const Result rectangleMethod(const double x1, const double x2, const double dx, 
 	return { omp_get_wtime() - now, s };
 }
 
-const Result trapezoidalMethod(const double x1, const double x2, const double dx, const int nThreads)
+const Result trapezoidalMethod(const double x1, const double x2, const double dx)
 {
 	const int N = static_cast<int>((x2 - x1) / dx);
 	double now = omp_get_wtime();
 	double s = 0;
 
-	#pragma omp parallel for num_threads(nThreads) reduction(+: s)
 	for (int i = 1; i < N; i++) s += f(x1 + i * dx);
 
 	s = (s + (f(x1) + f(x2)) / 2) * dx;

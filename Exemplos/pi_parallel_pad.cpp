@@ -45,5 +45,6 @@ int main (){
 	auto duration = (std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count());
 	float time = (float)duration/1000000;
 
-	std::cout << time << std::endl;	
+	std::cout << "Tempo de processamento = " << time << " segundos" << std::endl;
+	printf("Pi = %f\n", pi);
 }
