@@ -6,7 +6,9 @@
 #include <set>
 #include <math.h>
 
+
 #define NUM_THREADS 4
+#define M_PI 3.14159265358979323846
 #define PAD 8
 
 using namespace std;
@@ -73,6 +75,15 @@ float doubleIntegral(float h, float k,
 	answer *= (h / 3);
 
 	return answer;
+}
+
+double integral(double(*f)(double x), double a, double b, int n) {
+	double step = (b - a) / n;  // width of each small rectangle
+	double area = 0.0;  // signed area
+	for (int i = 0; i < n; i ++) {
+			area += f(a + (i + 0.5) * step) * step; // sum up each small rectangle
+	}
+	return area;
 }
 
 int main() {
@@ -145,18 +156,19 @@ int main() {
 	// k is the step size for integration wrt y
 	float h, k, lx, ux, ly, uy;
   
-	lx = 0.3, ux = 0.5, ly = 0.0,
-	uy = 1.0, h = 0.01, k = 0.0015;
+	lx = 0.0, ux = 1.0, ly = 0.0,
+	uy = 1.0, h = 0.1, k = 0.15;
 
-	printf("%f", doubleIntegral(h, k, lx, ux, ly, uy));
-	cout << endl;
-	
+	printf("Integral: %f\n", doubleIntegral(h, k, lx, ux, ly, uy));	
 
 	auto tIntegral2 = std::chrono::high_resolution_clock::now();
 	auto durationInt = (std::chrono::duration_cast<std::chrono::microseconds>( tIntegral2 - tIntegral ).count());
 	float timeInt = (float)durationInt/1000000;
 
-	std::cout << "Init Parallel Pad: " << timeInt << " microsegundos." << std::endl;
+	std::cout << "Time Integral: " << timeInt << " microsegundos." << std::endl;
 
+
+	cout.precision(7);
+	cout << integral(cos, 0, M_PI / 2, 10) << endl;
 
 }
