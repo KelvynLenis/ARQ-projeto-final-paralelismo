@@ -6,10 +6,12 @@
 #include <utility>
 #include <exception>
 #include <math.h>
-#include <vector>
 #include <chrono>
+#include <vector>
 
 using namespace std;
+#define NUM_THREADS 4
+#define PAD 8
 
 struct Result
 {
@@ -26,11 +28,14 @@ int main()
 	short method;
 	double x1, x2, dx;
 
+	omp_set_num_threads(NUM_THREADS);
 	cout << fixed << setprecision(8) << endl;
+
 	cout << "   X1: "; cin >> x1;
 	cout << "   X2: "; cin >> x2;
 	cout << "   dx: "; cin >> dx;
-	cout << "   Method (1 - rectangle, 2 - trapezoidal): "; cin >> method;
+	cout << "   Method (1 - rectangle, 2 - trapezoidal): "; 
+	cin >> method;
 
 	auto t1 = chrono::high_resolution_clock::now();
 
@@ -53,34 +58,58 @@ int main()
 
 	cout << endl << "   Results:" << endl;
 	std::cout << "  Tempo de processamento = " << time << " microsegundos." << std::endl;
-	cout << "  area: " << resultArea << endl;
 
+	cout << "  area: " << resultArea << endl;
 	cout << endl;
 	cin.get();
 	return 0;
 }
 
-const Result rectangleMethod(const double x1, const double x2, const double dx)
-{
+const Result rectangleMethod(const double x1, const double x2, const double dx){
 	const int N = static_cast<int>((x2 - x1) / dx);
 	double now = omp_get_wtime();
 	double s = 0;
 
-	for (int i = 1; i <= N; i++) s += f(x1 + i * dx);
+	omp_set_num_threads(NUM_THREADS);
+	int id, NT;
+	id = omp_get_thread_num();
+	NT = omp_get_num_threads();
 
+	#pragma omp parallel for reduction(+: s)
+	for (int i = 1; i <= N; i++){
+		s += f(x1 + i * dx);	
+	} 
+
+	// double sum[NUM_THREADS][PAD];	
+	// int i;
+
+	// #pragma omp parallel
+	// {
+	// 	#pragma omp for reduction(+: s)
+	// 	for(int i = id; i <= N; i = i + NUM_THREADS){
+	// 		// sum[id][0] = 0.0;
+	// 		sum[id][0] += f(x1 + i * dx);	
+	// 	}
+
+	// } 
+
+	#pragma barrier
 	s *= dx;
 	 
 	return { omp_get_wtime() - now, s };
 }
 
-const Result trapezoidalMethod(const double x1, const double x2, const double dx)
-{
+const Result trapezoidalMethod(const double x1, const double x2, const double dx){
 	const int N = static_cast<int>((x2 - x1) / dx);
 	double now = omp_get_wtime();
 	double s = 0;
 
-	for (int i = 1; i < N; i++) s += f(x1 + i * dx);
+	#pragma omp parallel for reduction(+: s)
+	for (int i = 1; i < N; i++) {
+		s += f(x1 + i * dx);
+	}
 
+	#pragma barrier
 	s = (s + (f(x1) + f(x2)) / 2) * dx;
 	 
 	return { omp_get_wtime() - now, s };
