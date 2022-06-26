@@ -95,8 +95,9 @@ const Result rectangleMethod(const double x1, const double x2, const double dx){
 
 	#pragma barrier
 	s *= dx;
+	sum[id][0] *= dx;
 	 
-	return { omp_get_wtime() - now, s };
+	return { omp_get_wtime() - now, sum[id][0] };
 }
 
 const Result trapezoidalMethod(const double x1, const double x2, const double dx){
@@ -104,10 +105,28 @@ const Result trapezoidalMethod(const double x1, const double x2, const double dx
 	double now = omp_get_wtime();
 	double s = 0;
 
-	#pragma omp parallel for reduction(+: s)
-	for (int i = 1; i < N; i++) {
-		s += f(x1 + i * dx);
-	}
+	omp_set_num_threads(NUM_THREADS);
+	int id, NT;
+	id = omp_get_thread_num();
+	NT = omp_get_num_threads();
+
+	// #pragma omp parallel for reduction(+: s)
+	// for (int i = 1; i < N; i++) {
+	// 	s += f(x1 + i * dx);
+	// }
+
+	double sum[NUM_THREADS][PAD];	
+	int i;
+
+	#pragma omp parallel
+	{
+		#pragma omp for reduction(+: s)
+		for(int i = id; i <= N; i = i + NUM_THREADS){
+			sum[id][0] += f(x1 + i * dx);	
+		}
+
+	} 
+
 
 	#pragma barrier
 	s = (s + (f(x1) + f(x2)) / 2) * dx;
