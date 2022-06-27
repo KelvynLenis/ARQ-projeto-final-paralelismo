@@ -11,7 +11,6 @@
 
 using namespace std;
 #define NUM_THREADS 4
-#define PAD 8
 
 struct Result
 {
@@ -57,7 +56,7 @@ int main()
 	float time = (float)duration/1000000;
 
 	cout << endl << "   Results:" << endl;
-	std::cout << "  Tempo de processamento = " << time << " microsegundos." << std::endl;
+	std::cout << "  Tempo de processamento = " << time << " segundos." << std::endl;
 
 	cout << "  area: " << resultArea << endl;
 	cout << endl;

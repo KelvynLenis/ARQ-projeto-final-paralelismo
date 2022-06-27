@@ -52,7 +52,7 @@ int main()
 	float time = (float)duration/1000000;
 
 	cout << endl << "   Results:" << endl;
-	std::cout << "  Tempo de processamento = " << time << " microsegundos." << std::endl;
+	std::cout << "  Tempo de processamento = " << time << " segundos." << std::endl;
 	cout << "  area: " << resultArea << endl;
 
 	cout << endl;
